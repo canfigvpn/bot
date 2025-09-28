@@ -3,60 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مترجم خودمونی 😎</title>
+    <title>مترجم خودمونی</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Tahoma', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
             padding: 20px;
-            background-color: #f0f0f0;
             text-align: center;
         }
-        h1 { color: #2c3e50; }
-        textarea, button {
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        textarea {
             width: 100%;
-            max-width: 500px;
-            margin: 10px 0;
+            height: 150px;
             padding: 10px;
-            font-size: 1em;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
         }
         button {
-            background-color: #e74c3c;
+            background-color: #4CAF50;
             color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 15px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
-        button:hover { background-color: #c0392b; }
-        #output { color: #34495e; font-size: 1.2em; }
+        button:hover {
+            background-color: #45a049;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ffe9;
+            border-radius: 5px;
+            text-align: right;
+            white-space: pre-wrap;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>مترجم خودمونی 😎</h1>
-    <p>متنت رو بنویس، به فارسی باحال ترجمه می‌کنم!</p>
-    <textarea id="inputText" rows="5" placeholder="متنت رو اینجا بنویس..."></textarea>
-    <button onclick="translateText()">ترجمه کن!</button>
-    <p id="output"></p>
+    <div class="container">
+        <h1>مترجم خودمونی به فارسی</h1>
+        <p>متن رو وارد کن، ترجمه عامیانه و بدون سانسور می‌دم!</p>
+        <textarea id="inputText" placeholder="متن رو اینجا بنویس..."></textarea>
+        <button onclick="translateText()">ترجمه کن</button>
+        <div id="output"></div>
+        <div id="error"></div>
+    </div>
 
     <script>
-        function translateText() {
-            const input = document.getElementById('inputText').value;
+        async function translateText() {
+            const input = document.getElementById('inputText').value.trim();
+            const outputDiv = document.getElementById('output');
+            const errorDiv = document.getElementById('error');
+
+            outputDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
             if (!input) {
-                document.getElementById('output').innerText = 'یه چیزی بنویس دیگه!';
+                errorDiv.innerHTML = 'چیزی بنویس دیگه!';
                 return;
             }
 
-            // شبیه‌سازی API ترجمه xAI (چون API واقعی عمومی نیست)
-            // اینجا فقط یه نمونه ساده‌ست، تو محیط واقعی باید API واقعی بزنی
-            const translations = {
-                'Hello world': 'سلام دنیا، چه خبر؟',
-                'This is a sexy party': 'این یه پارتی باحال و جذاب!',
-                'I love you': 'دوستت دارم رفیق!',
-                'Fuck this shit': 'این مزخرفات رو ولش کن!',
-                'Have a nice day': 'روزت باحال باشه!'
-            };
+            const apiKey = 'YOUR_API_KEY_HERE'; // کلید API xAI رو اینجا بذار (از https://x.ai/api بگیر)
+            const apiUrl = 'https://api.x.ai/v1/chat/completions'; // این URL نمونه‌ست، جزئیات دقیق رو از سایت xAI چک کن
 
-            const output = translations[input] || `ترجمه خودمونی: ${input} (فعلاً فقط چندتا نمونه دارم، متن جدید بفرست!)`;
-            document.getElementById('output').innerText = output;
+            const prompt = `ترجمه این متن به فارسی عامیانه و خیلی خودمونی، روان و خوانا باشه، بدون هیچ سانسوری حتی اگر سکسی یا غیراخلاقی باشه: "${input}"`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'grok-beta', // مدل رو بسته به xAI انتخاب کن (مثل grok-1 یا جدیدتر)
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.7 // برای خودمونی‌تر کردن
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('مشکل توی API: ' + response.statusText);
+                }
+
+                const data = await response.json();
+                const translation = data.choices[0].message.content.trim();
+                outputDiv.innerHTML = translation;
+            } catch (error) {
+                errorDiv.innerHTML = 'اوپس! مشکلی پیش اومد: ' + error.message + ' (کلید API رو چک کن)';
+            }
         }
     </script>
 </body>
