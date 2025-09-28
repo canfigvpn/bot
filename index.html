@@ -1,19 +1,63 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ربات مترجم خودمونی</title>
+    <title>مترجم خودمونی 😎</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #333; }
-        p { font-size: 1.2em; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        h1 { color: #2c3e50; }
+        textarea, button {
+            width: 100%;
+            max-width: 500px;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1em;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #c0392b; }
+        #output { color: #34495e; font-size: 1.2em; }
     </style>
 </head>
 <body>
-    <h1>ربات مترجم خودمونی</h1>
-    <p>این ربات هر متنی رو به فارسی خودمونی و روان ترجمه می‌کنه! 😎</p>
-    <p>برای استفاده، به تلگرام برو و به رباتم پیام بده: <a href="https://t.me/your_bot_username">@YourBotUsername</a></p>
-    <p>کد این پروژه تو <a href="https://github.com/yourusername/your-repo">GitHub</a> هست.</p>
+    <h1>مترجم خودمونی 😎</h1>
+    <p>متنت رو بنویس، به فارسی باحال ترجمه می‌کنم!</p>
+    <textarea id="inputText" rows="5" placeholder="متنت رو اینجا بنویس..."></textarea>
+    <button onclick="translateText()">ترجمه کن!</button>
+    <p id="output"></p>
+
+    <script>
+        function translateText() {
+            const input = document.getElementById('inputText').value;
+            if (!input) {
+                document.getElementById('output').innerText = 'یه چیزی بنویس دیگه!';
+                return;
+            }
+
+            // شبیه‌سازی API ترجمه xAI (چون API واقعی عمومی نیست)
+            // اینجا فقط یه نمونه ساده‌ست، تو محیط واقعی باید API واقعی بزنی
+            const translations = {
+                'Hello world': 'سلام دنیا، چه خبر؟',
+                'This is a sexy party': 'این یه پارتی باحال و جذاب!',
+                'I love you': 'دوستت دارم رفیق!',
+                'Fuck this shit': 'این مزخرفات رو ولش کن!',
+                'Have a nice day': 'روزت باحال باشه!'
+            };
+
+            const output = translations[input] || `ترجمه خودمونی: ${input} (فعلاً فقط چندتا نمونه دارم، متن جدید بفرست!)`;
+            document.getElementById('output').innerText = output;
+        }
+    </script>
 </body>
 </html>
