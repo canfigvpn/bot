@@ -42,6 +42,10 @@
         button:hover {
             background-color: #45a049;
         }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
         #output {
             margin-top: 20px;
             padding: 10px;
@@ -49,10 +53,16 @@
             border-radius: 5px;
             text-align: right;
             white-space: pre-wrap;
+            min-height: 50px;
         }
         #error {
             color: red;
             margin-top: 10px;
+        }
+        #loading {
+            color: #4CAF50;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
@@ -61,7 +71,8 @@
         <h1>مترجم خودمونی به فارسی</h1>
         <p>متن رو وارد کن، ترجمه عامیانه و بدون سانسور می‌دم!</p>
         <textarea id="inputText" placeholder="متن رو اینجا بنویس..."></textarea>
-        <button onclick="translateText()">ترجمه کن</button>
+        <button id="translateBtn" onclick="translateText()">ترجمه کن</button>
+        <div id="loading">در حال ترجمه...</div>
         <div id="output"></div>
         <div id="error"></div>
     </div>
@@ -71,19 +82,25 @@
             const input = document.getElementById('inputText').value.trim();
             const outputDiv = document.getElementById('output');
             const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+            const btn = document.getElementById('translateBtn');
 
             outputDiv.innerHTML = '';
             errorDiv.innerHTML = '';
+            loadingDiv.style.display = 'none';
+            btn.disabled = false;
 
             if (!input) {
-                errorDiv.innerHTML = 'چیزی بنویس دیگه!';
+                errorDiv.innerHTML = 'یه متن بنویس دیگه!';
                 return;
             }
 
-            const apiKey = 'YOUR_API_KEY_HERE'; // کلید API xAI رو اینجا بذار (از https://x.ai/api بگیر)
-            const apiUrl = 'https://api.x.ai/v1/chat/completions'; // این URL نمونه‌ست، جزئیات دقیق رو از سایت xAI چک کن
+            btn.disabled = true;
+            loadingDiv.style.display = 'block';
 
-            const prompt = `ترجمه این متن به فارسی عامیانه و خیلی خودمونی، روان و خوانا باشه، بدون هیچ سانسوری حتی اگر سکسی یا غیراخلاقی باشه: "${input}"`;
+            const apiKey = 'xai-jCSkpUvBsTpiP1Owxz6RjWIVPzAcsW7O96p9AyGM0Ffqtwwk2soJWKsvIOSdT3nTEP5RILLHRIjjNdwG';
+            const apiUrl = 'https://api.x.ai/v1/chat/completions';
+            const prompt = `ترجمه این متن به فارسی عامیانه و خیلی خودمونی، روان و خوانا، بدون هیچ سانسوری حتی اگه سکسی یا غیراخلاقی باشه: "${input}"`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -93,23 +110,42 @@
                         'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        model: 'grok-beta', // مدل رو بسته به xAI انتخاب کن (مثل grok-1 یا جدیدتر)
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.7 // برای خودمونی‌تر کردن
+                        model: 'grok-4-latest',
+                        messages: [
+                            { role: 'system', content: 'You are a translator who provides very casual, colloquial Persian translations, keeping the tone natural and unfiltered, even for sensitive or explicit content.' },
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: 0.7,
+                        stream: false
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error('مشکل توی API: ' + response.statusText);
+                    const errorData = await response.json();
+                    throw new Error(`مشکل توی API: ${errorData.error?.message || response.statusText}`);
                 }
 
                 const data = await response.json();
+                if (!data.choices || !data.choices[0]?.message?.content) {
+                    throw new Error('پاسخ API درست نیست، ساختار پاسخ رو چک کن');
+                }
+
                 const translation = data.choices[0].message.content.trim();
                 outputDiv.innerHTML = translation;
             } catch (error) {
-                errorDiv.innerHTML = 'اوپس! مشکلی پیش اومد: ' + error.message + ' (کلید API رو چک کن)';
+                errorDiv.innerHTML = `اوپس! مشکلی پیش اومد: ${error.message} (کلید API یا اینترنتت رو چک کن)`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                btn.disabled = false;
             }
         }
+
+        // Enter key برای ترجمه
+        document.getElementById('inputText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                translateText();
+            }
+        });
     </script>
 </body>
 </html>
